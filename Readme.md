@@ -10,6 +10,8 @@ This project implements a Content-Based Image Retrieval (CBIR) system, allowing 
 - **FastAPI Backend:** Implements the backend using FastAPI, a modern, fast (high-performance), web framework for building APIs with Python 3.7+ based on standard Python type hints.
 - **JavaScript/HTML/CSS Frontend:** Subtle frontend for interaction.
 
+![image](https://github.com/AminRane/CBIR/assets/71436342/3e1db202-2263-4d2c-86d4-2cbc62276ce4)
+
 ## Setup and Installation
 1. Clone the Repository
 `git clone https://github.com/AminRane/CBIR.git
