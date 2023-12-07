@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CBIR</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        #upload-card {
+            max-width: 400px;
+            margin: auto;
+            text-align: center;
+        }
+
+        #image-preview {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        #results-container {
+            margin-top: 10px;
+            position: relative;
+            text-align: center;
+        }
+
+        #results {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            filter: blur(0); /* Initial state: no blur */
+            justify-content: center; /* Center items horizontally */
+            align-items: center; /* Center items vertically */
+            /* height: 100vh; Adjust to your needs */
+        }
+
+        .result-image {
+            width: 200px;
+            height: 200px;
+        }
+
+        #loader {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            z-index: 1;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+<body>
+    <h1 class="text-center">Search Similar Images</h1>
+
+    <div id="upload-card" class="card">
+        <div class="card-body">
+            <h5 class="card-title">Choose an image</h5>
+            <form id="upload-form" enctype="multipart/form-data" onsubmit="return false;">
+                <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="query_image" accept="image/*" required>
+                    <label class="custom-file-label" for="query_image" id>Choose file</label>
+                </div>
+            </form>
+            <div id="image-preview"></div>
+            <button type="button" class="btn btn-primary" onclick="processImage(event)">Search</button>
+        </div>
+    </div>
+
+    <div id="results-container">
+        <div id="results"></div>
+        <div id="loader"></div>
+    </div>
+
+    <script>
+        $('#query_image').on('change', function() {
+            var fileInput = this;
+            if (fileInput.files && fileInput.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $('#image-preview').html('<img src="' + e.target.result + '" alt="Chosen Image" height="100" width="100">');
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            }
+        });
+
+        function processImage(event) {
+            var formData = new FormData();
+            formData.append('query_image', $('#query_image')[0].files[0]);
+
+            // Show loader and apply blur
+            $('#loader').show();
+            $('#results').css('filter', 'blur(5px)');
+
+            $.ajax({
+                url: '/process_image/',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(data) {
+                    // Hide loader and remove blur
+                    $('#loader').hide();
+                    $('#results').css('filter', 'blur(0)');
+                    displayResults(data);
+                },
+                error: function(xhr, status, error) {
+                    // Hide loader and remove blur on error
+                    $('#loader').hide();
+                    $('#results').css('filter', 'blur(0)');
+                    console.error("Error processing image:", error);
+                }
+            });
+
+            // Display chosen image
+            var fileInput = $('#query_image')[0];
+            if (fileInput.files && fileInput.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $('#image-preview').html('<img src="' + e.target.result + '" alt="Chosen Image" height="100" width="100">');
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            }
+
+            event.preventDefault();
+        }
+
+        function displayResults(data) {
+            var resultsDiv = $('#results');
+            resultsDiv.empty();
+
+            if (data.top_images && data.top_images.length > 0) {
+                resultsDiv.append('<div style="display: flex; flex-wrap: wrap; gap: 10px;">');
+
+                $.each(data.top_images, function(index, imagePath) {
+                    resultsDiv.append('<img src="' + imagePath + '" alt="Similar Image" class="result-image">');
+                });
+
+                resultsDiv.append('</div>');
+            }
+        }
+    </script>
+
+    <!-- Bootstrap JS (Popper.js and Bootstrap JS) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+</body>
+</html>
