@@ -22,17 +22,14 @@ async def read_item(request: Request):
 
 @app.post("/process_image/", response_class=JSONResponse)
 async def process_image(query_image: UploadFile = File(...)):
-    # Read the query image
-    # try:
+
     content = await query_image.read()
 
     top_images = utility.query_similar_images(content, 12) 
     print(top_images)
     return JSONResponse(content={"top_images": top_images})
-    
-    # except Exception as e:
-    #     return JSONResponse(content={"error": str(e)}, status_code=500)
+
 
 if __name__ == '__main__':
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=8000, reload=True)
 

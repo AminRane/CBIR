@@ -5,3 +5,4 @@ scrap_2.py
 __pycache__
 images
 models
+image_embeddings.npy
