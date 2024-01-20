@@ -47,7 +47,7 @@ def search_and_download(query):
             driver.implicitly_wait(2)
 
             # Check for a timeout 
-            if time.time() - start_time > 8:
+            if time.time() - start_time > 15:
                 print("Timeout reached. Exiting.")
                 break
 
